@@ -2,9 +2,16 @@ const express = require("express");
 const mysql = require("mysql2");
 const path = require("path");
 const multer = require("multer");
+const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+
+// Other setup...
 
 const app = express();
 const PORT = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // MySQL Database Connection
 const db = mysql.createConnection({
@@ -12,7 +19,7 @@ const db = mysql.createConnection({
     user: "root",
     password: "tiger", // Change to your MySQL password
     database: "ecommerce",
-    port: 3308, // Change if using a different port
+    port: 3306, // Change if using a different port
 });
 
 db.connect((err) => {
@@ -23,6 +30,65 @@ db.connect((err) => {
     }
 });
 
+// Signup route
+app.post('/signup', async (req, res) => {
+    const { name, email, password } = req.body;
+
+    console.log('Received data:', req.body); // Check if data is coming correctly
+
+    // Check if user already exists
+    db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
+        if (err) {
+            return res.json({ success: false, message: 'Database error' });
+        }
+
+        if (results.length > 0) {
+            return res.json({ success: false, message: 'User already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert new user into the database
+        db.query('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword], (err, results) => {
+            if (err) {
+                return res.json({ success: false, message: 'Error creating user' });
+            }
+
+            res.json({ success: true, message: 'User created successfully' });
+        });
+    });
+});
+
+
+// Signin Route
+app.post('/signin', (req, res) => {
+    const { email, password } = req.body;
+
+    // Check if user exists
+    db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
+        if (err) {
+            return res.json({ success: false, message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        const user = results[0];
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (isMatch) {
+            res.json({ success: true, message: 'Signin successful' });
+        } else {
+            res.json({ success: false, message: 'Invalid password' });
+        }
+    });
+});
+
+
 // Middleware to serve static files
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
@@ -30,7 +96,7 @@ app.use(express.json());
 
 // Routes for serving HTML files
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "signup.html"));
 });
 
 app.get("/admin", (req, res) => {
@@ -38,7 +104,7 @@ app.get("/admin", (req, res) => {
 });
 
 app.get("/dashboard", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "deshboard.html"));
+    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
 // Example API: Get all products
@@ -115,6 +181,28 @@ app.get("/get-products", (req, res) => {
         }
     });
 });
+
+
+app.get('/api/get-website-growth', async (req, res) => {
+    try {
+        const totalUsers = await getTotalUsers(); // Replace with your DB query logic
+        const totalOrders = await getTotalOrders(); // Replace with your DB query logic
+        const totalProducts = await getTotalProducts(); // Replace with your DB query logic
+
+        res.json({
+            success: true,
+            totalUsers,
+            totalOrders,
+            totalProducts
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Failed to fetch growth stats.'
+        });
+    }
+});
+
 
 // Start Server
 app.listen(PORT, () => {

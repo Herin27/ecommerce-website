@@ -4,49 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Add Products</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/admin.css">
 </head>
 <body>
 
-    <h2>Add New Product</h2>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-logo">
+            <h3>Admin Panel</h3>
+        </div>
+        <ul class="navbar-links">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Products</a></li>
+            <li><a href="#">Orders</a></li>
+            <li><a href="#">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Website Growth -->
+<div class="growth-container">
+    <h3>Website Growth</h3>
+    <div class="growth-stats">
+        <div class="growth-stat">
+            <p>Total Users:</p>
+            <h4 id="totalUsers">Loading...</h4>
+        </div>
+        <div class="growth-stat">
+            <p>Total Orders:</p>
+            <h4 id="totalOrders">Loading...</h4>
+        </div>
+        <div class="growth-stat">
+            <p>Total Products:</p>
+            <h4 id="totalProducts">Loading...</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Form -->
+<div class="form-container">
     <form id="productForm" enctype="multipart/form-data">
-        <label>Product Name:</label>
-        <input type="text" id="name" required>
+        <h2>Add New Product</h2>
+        <div class="form-group">
+            <label for="name">Product Name:</label>
+            <input type="text" id="name" class="input-field" required>
+        </div>
 
-        <label>Product Description:</label>
-        <textarea id="description" required></textarea>
+        <div class="form-group">
+            <label for="description">Product Description:</label>
+            <textarea id="description" class="input-field" required></textarea>
+        </div>
 
-        <label>Product Price:</label>
-        <input type="number" id="price" required>
+        <div class="form-group">
+            <label for="price">Product Price:</label>
+            <input type="number" id="price" class="input-field" required>
+        </div>
 
-        <label>Product Image:</label>
-        <input type="file" id="image" accept="image/*" required>
+        <div class="form-group">
+            <label for="image">Product Image:</label>
+            <input type="file" id="image" class="input-field" accept="image/*" required>
+        </div>
 
-        <button type="submit">Add Product</button>
+        <button type="submit" class="submit-btn">Add Product</button>
     </form>
+</div>
 
-    <script>
-        document.getElementById('productForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            let formData = new FormData();
-            formData.append("name", document.getElementById('name').value);
-            formData.append("description", document.getElementById('description').value);
-            formData.append("price", document.getElementById('price').value);
-            formData.append("image", document.getElementById('image').files[0]);
+<script>
+    // Fetch dynamic content for website growth (Example API Endpoints)
+    async function fetchGrowthStats() {
+        try {
+            let response = await fetch('/api/get-website-growth');
+            let data = await response.json();
 
-            let response = await fetch('/add-product', {
-                method: 'POST',
-                body: formData
-            });
-
-            let result = await response.json();
-            alert(result.message);
-            if (result.success) {
-                document.getElementById('productForm').reset();
+            if (data.success) {
+                document.getElementById('totalUsers').innerText = data.totalUsers;
+                document.getElementById('totalOrders').innerText = data.totalOrders;
+                document.getElementById('totalProducts').innerText = data.totalProducts;
+            } else {
+                alert('Error fetching growth stats');
             }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            alert('Failed to load website growth stats.');
+        }
+    }
+
+    // Fetch growth stats on page load
+    fetchGrowthStats();
+
+    // Form submit functionality
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let formData = new FormData();
+        formData.append("name", document.getElementById('name').value);
+        formData.append("description", document.getElementById('description').value);
+        formData.append("price", document.getElementById('price').value);
+        formData.append("image", document.getElementById('image').files[0]);
+
+        let response = await fetch('/add-product', {
+            method: 'POST',
+            body: formData
         });
-    </script>
+
+        let result = await response.json();
+        alert(result.message);
+        if (result.success) {
+            document.getElementById('productForm').reset();
+        }
+    });
+</script>
 
 </body>
 </html>

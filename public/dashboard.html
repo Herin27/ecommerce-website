@@ -3,34 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <title>E-Commerce Website</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-<nav>
-    <h1>My E-Commerce</h1>
-    <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Products</a></li>
-        <li><a href="#">Cart (<span id="cart-count">0</span>)</a></li>
-    </ul>
-</nav>
-
-<div class="slider">
-    <img src="images/slider1.jpg" alt="Slider Image 1">
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="cart-animation" id="cartAnimation">
+        <i class="fa fa-shopping-cart"></i>
+    </div>
+    <p>Loading, please wait...</p>
 </div>
+<!-- Navbar Start -->
+<nav class="navbar">
+    <div class="logo">
+        <a href="#">E-Shop</a>
+    </div>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Shop</a></li>
+        <li><a href="#">Categories</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="admin.html" class="admin-btn">Admin</a></li>
+    </ul>
+    <div class="cart-container">
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒 <span id="cart-count">0</span>
+        </div>
+    </div>
+    <div class="menu-toggle">&#9776;</div> <!-- Mobile Menu Icon -->
+</nav>
+<!-- Navbar End -->
 
-<h2>Products</h2>
-<div id="product-list"></div>
+<!-- Slider Start -->
+<div class="slider">
+    <div class="slider-container">
+        <div class="slider-item">
+            <img src="images/1.jpg" alt="Slider Image 1">
+            <div class="slider-caption">
+                <h2>Explore Our Latest Collection</h2>
+                <p>Discover new arrivals with exclusive offers.</p>
+            </div>
+        </div>
+        <div class="slider-item">
+            <img src="images/2.jpg" alt="Slider Image 2">
+            <div class="slider-caption">
+                <h2>Best Quality Products</h2>
+                <p>Shop premium products at unbeatable prices.</p>
+            </div>
+        </div>
+        <div class="slider-item">
+            <img src="images/3.jpg" alt="Slider Image 3">
+            <div class="slider-caption">
+                <h2>Get Ready for Big Discounts</h2>
+                <p>Exclusive deals available for a limited time.</p>
+            </div>
+        </div>
+    </div>
 
-<h2>Shopping Cart</h2>
-<div id="cart-items"></div>
+</div>
+<!-- Slider End -->
 
-<footer>
-    <p>© 2025 My E-Commerce</p>
+<!-- Product Container -->
+<h2 class="our_product">Our Products</h2>
+<div id="productContainer"></div>
+
+<!-- Cart Dropdown -->
+<div id="cartMenu" class="cart-menu">
+    <h3>Shopping Cart</h3>
+    <div id="cartItems"></div>
+    <div class="cart-footer">
+        <button onclick="clearCart()" class="clear-cart-btn">Clear Cart</button>
+        <button onclick="checkoutCart()" class="checkout-btn">Checkout</button>
+    </div>
+</div>
+<footer class="ecom-footer">
+    <div class="footer-container">
+        <!-- Company Info -->
+        <div class="footer-section">
+            <h3>ShopEase</h3>
+            <p>Your go-to online store for the best deals.</p>
+            <p>© 2025 ShopEase. All rights reserved.</p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Shop</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">About Us</a></li>
+            </ul>
+        </div>
+
+        <!-- Customer Service -->
+        <div class="footer-section">
+            <h3>Customer Service</h3>
+            <ul>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Returns</a></li>
+                <li><a href="#">Shipping</a></li>
+                <li><a href="#">Support</a></li>
+            </ul>
+        </div>
+
+        <!-- Social Media & Newsletter -->
+        <div class="footer-section">
+            <h3>Follow Us</h3>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <h3>Subscribe</h3>
+            <input type="email" placeholder="Enter your email" />
+            <button>Subscribe</button>
+        </div>
+    </div>
 </footer>
 
+
+
+
 <script src="js/script.js"></script>
+
 </body>
 </html>
