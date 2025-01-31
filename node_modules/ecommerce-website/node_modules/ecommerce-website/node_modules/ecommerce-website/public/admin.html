@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Add Products</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h2>Add New Product</h2>
+    <form id="productForm" enctype="multipart/form-data">
+        <label>Product Name:</label>
+        <input type="text" id="name" required>
+
+        <label>Product Description:</label>
+        <textarea id="description" required></textarea>
+
+        <label>Product Price:</label>
+        <input type="number" id="price" required>
+
+        <label>Product Image:</label>
+        <input type="file" id="image" accept="image/*" required>
+
+        <button type="submit">Add Product</button>
+    </form>
+
+    <script>
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let formData = new FormData();
+            formData.append("name", document.getElementById('name').value);
+            formData.append("description", document.getElementById('description').value);
+            formData.append("price", document.getElementById('price').value);
+            formData.append("image", document.getElementById('image').files[0]);
+
+            let response = await fetch('/add-product', {
+                method: 'POST',
+                body: formData
+            });
+
+            let result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                document.getElementById('productForm').reset();
+            }
+        });
+    </script>
+
+</body>
+</html>
