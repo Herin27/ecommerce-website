@@ -1,0 +1,175 @@
+/* Basic reset for margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url("https://plus.unsplash.com/premium_photo-1677995700941-100976883af7?q=80&w=2123&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Container for the signin form */
+.form-container {
+    background-color: rgba(255, 255, 255);
+    border-radius: 15px;
+    padding: 40px 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transform: translateY(-30px); /* Floating effect */
+    animation: fadeIn 1s ease-in-out; /* Smooth fade-in effect */
+}
+
+/* Animation for fading in the form */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-50px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Heading styling */
+h2 {
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #333;
+    letter-spacing: 1px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Form field styling */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+/* Label styling */
+label {
+    font-size: 14px;
+    color: #555;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Input field styling */
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 15px;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+/* Focus effect on input fields */
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #00bcd4;
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.7);
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 15px;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.4s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #ff4081;
+    transform: translateY(-5px);
+}
+
+/* Hover effect - glowing underline */
+button::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background-color: #fff;
+    bottom: 0;
+    left: 0;
+    transform: scaleX(0);
+    transition: all 0.4s ease;
+}
+
+button:hover::before {
+    transform: scaleX(1);
+}
+
+/* Link for creating an account */
+p {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Link styling */
+a {
+    color: #00bcd4;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #ff4081;
+}
+
+/* Styling for image */
+.image-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Responsiveness for smaller screens */
+@media (max-width: 480px) {
+    .form-container {
+        width: 85%;
+        padding: 25px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    button {
+        padding: 12px;
+        font-size: 16px;
+    }
+}

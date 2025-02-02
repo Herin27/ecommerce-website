@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="./css/payment.css">
+</head>
+<body>
+<div class="payment-container">
+    <h2>Payment Information</h2>
+    <p>Your Total Amount: ₹<span id="totalAmount"></span></p>
+
+    <button id="payBtn" onclick="processPayment()">Pay Now</button>
+    <button id="codBtn" onclick="processCOD()">Cash on Delivery</button>
+</div>
+
+<script>
+    // Get total cart value from localStorage
+    function getCartTotal() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        return totalAmount;
+    }
+
+    // Display total amount on payment page
+    function displayTotalAmount() {
+        let totalAmount = getCartTotal();
+        document.getElementById('totalAmount').textContent = totalAmount;
+    }
+
+    // Process Payment
+    function processPayment() {
+        alert("Payment Successful!");
+        // You can add integration with actual payment gateways here (Stripe, PayPal, etc.)
+        localStorage.removeItem("cart"); // Clear cart after successful payment
+    }
+
+    // Process Cash on Delivery
+    function processCOD() {
+        alert("Order Placed with Cash on Delivery option!");
+        localStorage.removeItem("cart"); // Clear cart after COD order
+    }
+
+    // Run this function when page is loaded
+    window.onload = displayTotalAmount;
+</script>
+</body>
+</html>
