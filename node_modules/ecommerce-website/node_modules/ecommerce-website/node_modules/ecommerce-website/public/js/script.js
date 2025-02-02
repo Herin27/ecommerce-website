@@ -42,7 +42,7 @@ setInterval(() => {
 // Fetch and display products from the server
 
 document.addEventListener("DOMContentLoaded", function () {
-    loadProducts();
+    fetchProducts();
     updateCartCount();
 });
 
@@ -52,37 +52,36 @@ function toggleCart() {
     loadCart();
 }
 
-async function loadProducts() {
-    try {
-        let response = await fetch("/get-products");
-        let data = await response.json();
-
-        if (data.success) {
-            let container = document.getElementById("productContainer");
-            container.innerHTML = "";
-
-            data.products.forEach(product => {
-                let productHTML = `
-                    <div class="product-card">
-                        <img src="/uploads/${product.image}" alt="${product.name}">
-                        <h3>${product.name}</h3>
-                        <p>${product.description}</p>
-                        <span>₹${product.price}</span>
-                        <button class="addToCart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}">
-                            Add to Cart
-                        </button>
-                    </div>
-                `;
-                container.innerHTML += productHTML;
-            });
-
-            attachCartEventListeners();
-        }
-    } catch (error) {
-        console.error("Error fetching products:", error);
-    }
+function fetchProducts() {
+    fetch("/get-products") // API call to get products
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayProducts(data.products);
+            } else {
+                console.error("Error fetching products:", data.message);
+            }
+        })
+        .catch(error => console.error("Fetch error:", error));
 }
 
+function displayProducts(products) {
+    const productContainer = document.getElementById("productContainer");
+    productContainer.innerHTML = ""; // Clear previous content
+
+    products.forEach(product => {
+        const productElement = document.createElement("div");
+        productElement.classList.add("product-card");
+        productElement.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" class="product-img">
+                <h3>${product.name}</h3>
+                <p>${product.description}</p>
+                <p><strong>Price: </strong>$${product.price}</p>
+                <button onclick="addToCart(${product.id})">Add to Cart</button>
+            `;
+        productContainer.appendChild(productElement);
+    });
+}
 
 // Add Event Listeners for Cart
 function attachCartEventListeners() {

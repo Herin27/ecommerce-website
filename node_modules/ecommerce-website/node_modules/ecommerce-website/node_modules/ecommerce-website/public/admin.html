@@ -103,15 +103,23 @@
         formData.append("price", document.getElementById('price').value);
         formData.append("image", document.getElementById('image').files[0]);
 
-        let response = await fetch('/add-product', {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            let response = await fetch('/add-product', {
+                method: 'POST',
+                body: formData
+            });
 
-        let result = await response.json();
-        alert(result.message);
-        if (result.success) {
-            document.getElementById('productForm').reset();
+            let result = await response.json();
+            alert(result.message);
+
+            if (result.success) {
+                document.getElementById('productForm').reset();
+            } else {
+                console.error("Product addition failed:", result.message);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Failed to add product.");
         }
     });
 </script>

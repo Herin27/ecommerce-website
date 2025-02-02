@@ -134,13 +134,14 @@ app.post("/api/add-product", (req, res) => {
 
 
 // Create 'products' table if not exists
-db.query(`CREATE TABLE IF NOT EXISTS product (
+db.query(`CREATE TABLE IF NOT EXISTS product1 (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     image VARCHAR(255) NOT NULL
     );
+
 `, (err) => {
     if (err) console.log(err);
 });
@@ -156,28 +157,28 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 app.use("/uploads", express.static("uploads")); // Ensure static serving
 
-// Route to Handle Product Upload
-app.post("/upload-product", upload.single("image"), (req, res) => {
-    if (!req.file) return res.json({ success: false, message: "Image upload failed" });
-
+// Route to Add Product
+app.post("/add-product", upload.single("image"), (req, res) => {
     const { name, description, price } = req.body;
-    const imagePath = "/uploads/" + req.file.filename;
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-    db.query("INSERT INTO product (name, description, price, image) VALUES (?, ?, ?, ?)",
-        [name, description, price, imagePath],
-        (err) => {
-            if (err) {
-                console.error(err);
-                return res.json({ success: false, message: "Database insert failed" });
-            }
-            res.json({ success: true, message: "Product uploaded successfully!" });
+    if (!name || !description || !price || !imagePath) {
+        return res.json({ success: false, message: "All fields are required" });
+    }
+
+    const sql = "INSERT INTO product1 (name, description, price, image) VALUES (?, ?, ?, ?)";
+    db.query(sql, [name, description, price, imagePath], (err, result) => {
+        if (err) {
+            console.error("Error inserting product:", err);
+            return res.json({ success: false, message: "Database error" });
         }
-    );
+        res.json({ success: true, message: "Product added successfully!" });
+    });
 });
 
 // Route to Fetch Products
 app.get("/get-products", (req, res) => {
-    db.query("SELECT * FROM product", (err, results) => {
+    db.query("SELECT * FROM product1", (err, results) => {
         if (err) return res.json({ success: false, message: "Error fetching products" });
 
         res.json({
@@ -187,11 +188,12 @@ app.get("/get-products", (req, res) => {
                 name: prod.name,
                 description: prod.description,
                 price: prod.price,
-                image: `http://localhost:3000${prod.image}` // Ensure correct URL
+                image: `http://localhost:3000${prod.image}`
             }))
         });
     });
 });
+
 
 
 
