@@ -204,7 +204,15 @@ app.get("/get-products", (req, res) => {
     });
 });
 
-
+app.get("/products", (req, res) => {
+    db.query("SELECT * FROM product1", (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
 
 
 // Start Server
