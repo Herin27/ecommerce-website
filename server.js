@@ -16,9 +16,9 @@ app.use(express.json());
 // MySQL Database Connection
 const db = mysql.createConnection({
     host: "sql12.freesqldatabase.com",
-    user: "sql12760599",
-    password: "IXbzS9Iij2", // Change to your MySQL password
-    database: "sql12760599",
+    user: "sql12766280",
+    password: "IXBy5yu3Rp", // Change to your MySQL password
+    database: "sql12766280",
     port: 3306, // Change if using a different port
 });
 
@@ -132,7 +132,17 @@ app.post("/api/add-product", (req, res) => {
 });
 
 
+db.query(`CREATE TABLE user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
 
+
+`, (err) => {
+    if (err) console.log(err);
+});
 // Create 'products' table if not exists
 db.query(`CREATE TABLE IF NOT EXISTS product1 (
     id INT AUTO_INCREMENT PRIMARY KEY,
