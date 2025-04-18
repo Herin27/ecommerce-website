@@ -1,174 +1,126 @@
 const express = require("express");
-const mysql = require("mysql2");
+const mongoose = require("mongoose");
 const path = require("path");
+const connectDB = require("./config/db");
 const multer = require("multer");
-const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs');
-
-// Other setup...
+const bcrypt = require("bcryptjs");
+const nodemailer = require('nodemailer');
+const cors = require('cors');
+const bodyParser = require("body-parser");
+require("dotenv").config();
 
 const app = express();
 const PORT = 3000;
+app.use(cors());
 
-// Middleware to parse JSON bodies
+connectDB();
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// MySQL Database Connection
-const db = mysql.createConnection({
-    host: "sql12.freesqldatabase.com",
-    user: "sql12766280",
-    password: "IXBy5yu3Rp", // Change to your MySQL password
-    database: "sql12766280",
-    port: 3306, // Change if using a different port
+// Define Schemas
+const userSchema = new mongoose.Schema({
+    name: String,
+    email: { type: String, unique: true },
+    password: String
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error("Database connection failed:", err);
-    } else {
-        console.log("Connected to MySQL Database");
+const productSchema = new mongoose.Schema({
+    name: String,
+    description: String,
+    price: Number,
+    image: String
+});
+
+// Define Models
+const User = mongoose.model("User", userSchema);
+const Product = mongoose.model("Product", productSchema);
+
+// Signup Route
+app.post("/signup", async (req, res) => {
+    const { name, email, password } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.json({ success: false, message: "User already exists" });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ name, email, password: hashedPassword });
+        await newUser.save();
+
+        res.json({ success: true, message: "User created successfully" });
+    } catch (err) {
+        res.json({ success: false, message: "Error creating user" });
     }
 });
 
-// Signup route
-app.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
-
-    console.log('Received data:', req.body); // Check if data is coming correctly
-
-    // Check if user already exists
-    db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
-        if (err) {
-            return res.json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length > 0) {
-            return res.json({ success: false, message: 'User already exists' });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert new user into the database
-        db.query('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword], (err, results) => {
-            if (err) {
-                return res.json({ success: false, message: 'Error creating user' });
-            }
-
-            res.json({ success: true, message: 'User created successfully' });
-        });
-    });
-});
-
-
 // Signin Route
-app.post('/signin', (req, res) => {
-    const { email, password } = req.body;
+const otpStore = {}; // store OTPs temporarily
 
-    // Check if user exists
-    db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
-        if (err) {
-            return res.json({ success: false, message: 'Database error' });
-        }
+// Send OTP
+app.post('/send-otp', async (req, res) => {
+    const { email } = req.body;
 
-        if (results.length === 0) {
-            return res.json({ success: false, message: 'User not found' });
-        }
+    if (!email) return res.json({ success: false, message: 'Email is required' });
 
-        const user = results[0];
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    otpStore[email] = otp;
 
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (isMatch) {
-            res.json({ success: true, message: 'Signin successful' });
-        } else {
-            res.json({ success: false, message: 'Invalid password' });
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'herin7151@gmail.com',
+            pass: 'hxsr ruik jdsy xncs' // Use Gmail App Password
         }
     });
+
+    const mailOptions = {
+        from: 'herin7151@gmail.com',
+        to: email,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is ${otp}`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, message: 'Failed to send OTP' });
+    }
 });
 
+// Verify OTP
+app.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
 
-// Middleware to serve static files
+    if (otpStore[email] && otpStore[email] == otp) {
+        delete otpStore[email]; // remove after verification
+        res.json({ success: true });
+    } else {
+        res.json({ success: false, message: 'Invalid OTP' });
+    }
+});
+  
+// Serve Static Files
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Routes for serving HTML files
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "signup.html"));
-});
-
-app.get("/admin", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "admin.html"));
-});
-
-app.get("/dashboard", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
-});
-
-// Example API: Get all products
-app.get("/api/products", (req, res) => {
-    db.query("SELECT * FROM products", (err, results) => {
-        if (err) {
-            res.status(500).json({ error: "Database error" });
-        } else {
-            res.json(results);
-        }
-    });
-});
-
-// Example API: Add a product
-app.post("/api/add-product", (req, res) => {
-    const { name, price, description } = req.body;
-    const query = "INSERT INTO products (name, price, description) VALUES (?, ?, ?)";
-    db.query(query, [name, price, description], (err, result) => {
-        if (err) {
-            res.status(500).json({ error: "Error adding product" });
-        } else {
-            res.json({ message: "Product added successfully", productId: result.insertId });
-        }
-    });
-});
-
-
-db.query(`CREATE TABLE user (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-);
-
-
-`, (err) => {
-    if (err) console.log(err);
-});
-// Create 'products' table if not exists
-db.query(`CREATE TABLE IF NOT EXISTS product1 (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    image VARCHAR(255) NOT NULL
-    );
-
-`, (err) => {
-    if (err) console.log(err);
-});
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "signup.html")));
+app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
+app.get("/dashboard", (req, res) => res.sendFile(path.join(__dirname, "public", "dashboard.html")));
 
 // Multer Storage for Image Uploads
 const storage = multer.diskStorage({
     destination: "./uploads/",
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
-
 const upload = multer({ storage });
-app.use("/uploads", express.static("uploads")); // Ensure static serving
 
-// Route to Add Product
-app.post("/add-product", upload.single("image"), (req, res) => {
+// Add Product Route
+app.post("/add-product", upload.single("image"), async (req, res) => {
     const { name, description, price } = req.body;
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -176,42 +128,33 @@ app.post("/add-product", upload.single("image"), (req, res) => {
         return res.json({ success: false, message: "All fields are required" });
     }
 
-    const sql = "INSERT INTO product1 (name, description, price, image) VALUES (?, ?, ?, ?)";
-    db.query(sql, [name, description, price, imagePath], (err, result) => {
-        if (err) {
-            console.error("Error inserting product:", err);
-            return res.json({ success: false, message: "Database error" });
-        }
+    try {
+        const newProduct = new Product({ name, description, price, image: imagePath });
+        await newProduct.save();
         res.json({ success: true, message: "Product added successfully!" });
-    });
+    } catch (err) {
+        res.json({ success: false, message: "Database error" });
+    }
 });
 
-// Route to Fetch Products
-app.get("/get-products", (req, res) => {
-    db.query("SELECT * FROM product1", (err, results) => {
-        if (err) return res.json({ success: false, message: "Error fetching products" });
-
-        res.json({
-            success: true,
-            products: results.map(prod => ({
-                id: prod.id,
-                name: prod.name,
-                description: prod.description,
-                price: prod.price,
-                image: `http://localhost:3000${prod.image}`
-            }))
-        });
+// Route
+app.get("/get-products", async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json({
+      success: true,
+      products: products.map(prod => ({
+        id: prod._id,
+        name: prod.name,
+        description: prod.description,
+        price: prod.price,
+        image: `http://localhost:3000${prod.image}`,
+      })),
     });
-});
-
-app.get("/products", (req, res) => {
-    db.query("SELECT * FROM product1", (err, result) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(result);
-        }
-    });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Error fetching products" });
+  }
 });
 
 

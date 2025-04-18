@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/shop.css">
+    <title>Shop Page</title>
+</head>
+<body>
+<!-- Navbar Start -->
+<nav class="navbar">
+    <div class="logo">
+        <a href="#">E-Shop</a>
+    </div>
+    <ul class="nav-links">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="Category.html">Categories</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="admin.html" class="admin-btn">Admin</a></li>
+    </ul>
+    <div class="cart-container">
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒 <span id="cart-count">0</span>
+        </div>
+    </div>
+    <div class="menu-toggle">&#9776;</div> <!-- Mobile Menu Icon -->
+</nav>
+<!-- Navbar End -->
+    <div class="shop-banner">
+        <h2>Shop Page</h2>
+    </div>
+    <div class="container" id="product-container"></div>
+
+    <script>
+        async function fetchProducts() {
+            try {
+                let response = await fetch("http://localhost:3000/products");
+                let products = await response.json();
+                let container = document.getElementById("product-container");
+
+                products.forEach(product => {
+                    let div = document.createElement("div");
+                    div.className = "product";
+                    div.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>Price: ₹${product.price}</p>
+                        <button>Add to Cart</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        }
+
+        fetchProducts();
+    </script>
+
+</body>
+</html>

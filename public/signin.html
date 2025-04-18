@@ -8,46 +8,70 @@
 </head>
 <body>
 <div class="form-container">
-    <h2>Sign In</h2>
-    <form id="signinForm">
+    <h2>Sign In with Email OTP</h2>
+
+    <!-- Email Form -->
+    <form id="emailForm">
         <div class="form-group">
-            <label for="email">Email:</label>
+            <label for="email">Enter your Email:</label>
             <input type="email" id="email" name="email" required>
         </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Signin</button>
+        <button type="submit">Send OTP</button>
     </form>
+
+    <!-- OTP Form (hidden initially) -->
+    <form id="otpForm" style="display:none;">
+        <div class="form-group">
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" required>
+        </div>
+        <button type="submit">Verify OTP</button>
+    </form>
+
     <p>Don't have an account? <a href="signup.html">Sign up</a></p>
 </div>
 
 <script>
-    document.getElementById('signinForm').addEventListener('submit', async (e) => {
+    const emailForm = document.getElementById('emailForm');
+    const otpForm = document.getElementById('otpForm');
+
+    let userEmail = "";
+
+    emailForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        userEmail = document.getElementById('email').value;
 
-        let email = document.getElementById('email').value;
-        let password = document.getElementById('password').value;
-
-        let formData = {
-            email,
-            password
-        };
-
-        let response = await fetch('/signin', {
+        const response = await fetch('http://localhost:3000/send-otp', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail })
         });
 
-        let result = await response.json();
+        const result = await response.json();
         if (result.success) {
-            window.location.href = 'dashboard.html'; // Redirect to index page
+            alert("OTP sent to your email.");
+            emailForm.style.display = 'none';
+            otpForm.style.display = 'block';
         } else {
-            alert(result.message);
+            alert(result.message || "Failed to send OTP.");
+        }
+    });
+
+    otpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otp = document.getElementById('otp').value;
+
+        const response = await fetch('http://localhost:3000/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail, otp })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = 'dashboard.html';
+        } else {
+            alert(result.message || "Invalid OTP.");
         }
     });
 </script>

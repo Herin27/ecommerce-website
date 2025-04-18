@@ -1,13 +1,14 @@
-const mysql = require("mysql2");
-const dotenv = require("dotenv");
-dotenv.config();
+const mongoose = require("mongoose");
+require("dotenv").config(); // Load environment variables
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-}).promise();
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB Connected to Atlas...");
+  } catch (error) {
+    console.error("MongoDB Connection Error:", error);
+    process.exit(1); // Exit process with failure
+  }
+};
 
-module.exports = pool;
+module.exports = connectDB;
